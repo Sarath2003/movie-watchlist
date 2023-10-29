@@ -198,8 +198,7 @@ input[type="text"]{
         height: 200px;
     }
 
-    .first-line,
-    .second-line{
+    .first-line{
         gap: 1.5em;
         justify-content: flex-start;
     }

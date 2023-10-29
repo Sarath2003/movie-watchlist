@@ -1,26 +1,29 @@
 let moviesList = document.getElementById('movies-list')
 let watchlistedMovies = JSON.parse(localStorage.getItem("watchlist-movies"))
-let moviesHtml = ""
 
-function render(watchlistedMovies){
+async function render(watchlistedMovies){
     if(watchlistedMovies.length == 0){
         emptyWatchList()
     }
     else{
+        let moviesHtml = ""
         for(let imdbID of watchlistedMovies){
-            fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=940211cb`)
-            .then(res => res.json())
-            .then(data => {
-                addToHtml(data)
-                moviesList.innerHTML = moviesHtml
-            })
+            const data = getMoviesData(imdbID)
+            moviesHtml += addToHtml(await data)
         }
+        moviesList.innerHTML = moviesHtml
     }
+}
+
+async function getMoviesData(imdbID){
+    const response = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=940211cb`)
+    const data = await response.json()
+    return data 
 }
 
 function addToHtml(movieData){
     const {Poster, Title, imdbRating, Runtime, Genre, Plot, imdbID} = movieData
-    moviesHtml += `
+    return `
     <div class="movie">
         <img src=${Poster} alt="" class="movie-pic">
         <div class="first-line">
@@ -67,7 +70,6 @@ document.addEventListener('click', (e)=>{
 function removeFromWatchList(imdbID){
     const index = watchlistedMovies.indexOf(imdbID)
     watchlistedMovies.splice(index, 1)
-    console.log(watchlistedMovies)
     localStorage.setItem("watchlist-movies", JSON.stringify(watchlistedMovies))
     moviesHtml = ""
     render(watchlistedMovies)

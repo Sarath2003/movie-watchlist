@@ -2,50 +2,48 @@ const searchBar = document.getElementById('movie-search-bar')
 let moviesList = document.getElementById('movies-list')
 const form = document.getElementById('movie-input')
 let watchlistedMovies = []
-let moviesHtml = ""
 const localStorageLeads = JSON.parse(localStorage.getItem("watchlist-movies"))
 
 if(localStorageLeads){
     watchlistedMovies = localStorageLeads
 }
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', fetchMovies)
+
+async function fetchMovies(e){
     e.preventDefault()
-    fetch(`https://www.omdbapi.com/?s=${searchBar.value}&apikey=940211cb`)
-    .then(res => res.json())
-    .then(data => {
-        if(data.Response == 'False'){
-            renderAplology()
-            return
-        }
-        moviesHtml = ""
-        let imdbIDArr = []
-        let moviesData = data.Search
-        for(let movie of moviesData){
-            imdbIDArr.push(movie.imdbID)
-        }
-        getMovieData(imdbIDArr)
-    })
-})
-
-
-function getMovieData(imdbIDArr){
-    for(let imdbID of imdbIDArr){
-        fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=940211cb`)
-        .then(res => res.json())
-        .then(data => {
-            addToHtml(data)
-            moviesList.innerHTML = moviesHtml
-        })
+    const moviesAPIData = await getDataFromAPI()
+    let moviesHTML = ""
+    for(let movieAPIData of moviesAPIData){
+        const movieData = getMoviesData(movieAPIData)
+        moviesHTML += addToHtml(await movieData)
     }
+    moviesList.innerHTML = moviesHTML
 }
+
+async function getDataFromAPI(){
+    let response = await fetch(`https://www.omdbapi.com/?s=${searchBar.value}&apikey=940211cb`)
+    let data = await response.json()
+    if(data.Response == 'False'){
+        renderAplology()
+        return
+    }
+    return data.Search
+}
+
+async function getMoviesData(movieAPIData){
+    const response =  await fetch(`https://www.omdbapi.com/?i=${movieAPIData.imdbID}&apikey=940211cb`)
+    const movieData = await response.json()
+    return movieData
+}
+
 
 function addToHtml(movieData){
     if(watchlistedMovies.includes(movieData.imdbID)){
-        moviesHtml += savedMovie(movieData)
+        return savedMovie(movieData)
     }
     else{
-        moviesHtml += unsavedMovie(movieData)
+        return unsavedMovie(movieData)
     }
 }
 
