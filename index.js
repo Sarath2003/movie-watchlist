@@ -12,11 +12,12 @@ form.addEventListener('submit', fetchMovies)
 
 async function fetchMovies(e){
     e.preventDefault()
+    moviesList.innerHTML = `<div class="loader"></div>`
     const moviesAPIData = await getDataFromAPI()
     let moviesHTML = ""
     for(let movieAPIData of moviesAPIData){
-        const movieData = getMoviesData(movieAPIData)
-        moviesHTML += addToHtml(await movieData)
+        const movieData = await getMoviesData(movieAPIData)
+        moviesHTML += addToHtml(movieData)
     }
     moviesList.innerHTML = moviesHTML
 }
@@ -48,7 +49,7 @@ function addToHtml(movieData){
 }
 
 function savedMovie(movieData){
-    const {Poster, Title, imdbRating, Runtime, Genre, Plot, imdbID} = movieData
+    const {Poster, Title, imdbRating, Year, Genre, Plot, imdbID} = movieData
     return `
     <div class="movie">
         <img src=${Poster} alt="" class="movie-pic">
@@ -61,7 +62,7 @@ function savedMovie(movieData){
             </div>
         </div>
         <div class="second-line">
-            <p class="movie-length">${Runtime}</p>
+            <p class="release-year">${Year}</p>
             <p class="genres">${Genre}</p>
             <div class="add-to-watchlist" id=${imdbID}-add-div>
                 <i class="fa-sharp fa-solid fa-circle-check green"></i>
@@ -75,7 +76,7 @@ function savedMovie(movieData){
 }
 
 function unsavedMovie(movieData){
-    const {Poster, Title, imdbRating, Runtime, Genre, Plot, imdbID} = movieData
+    const {Poster, Title, imdbRating, Year, Genre, Plot, imdbID} = movieData
     return `
     <div class="movie">
         <img src=${Poster} alt="" class="movie-pic">
@@ -88,7 +89,7 @@ function unsavedMovie(movieData){
             </div>
         </div>
         <div class="second-line">
-            <p class="movie-length">${Runtime}</p>
+            <p class="release-year">${Year}</p>
             <p class="genres">${Genre}</p>
             <div class="add-to-watchlist" id=${imdbID}-add-div>
                 <i class="fa-solid fa-circle-plus" data-add=${imdbID}></i>
